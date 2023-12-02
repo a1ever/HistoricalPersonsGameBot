@@ -83,9 +83,10 @@ def get_fact_keyboard():
 
 def generate_round_keyboard(fact: Fact):
     builder = InlineKeyboardBuilder()
-    builder.button(
-        text="Получить", callback_data=FactFactory(where="fact")
-    )
+    if fact.fact_amount != fact.max_fact_amount:
+        builder.button(
+            text="Получить", callback_data=FactFactory(where="fact")
+        )
     builder.button(
         text="по", callback_data=FactFactory(where="fact")
     )

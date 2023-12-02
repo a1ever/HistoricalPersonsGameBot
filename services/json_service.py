@@ -1,5 +1,4 @@
 import json
-import asyncio
 import random
 
 from models.Persona import Persona

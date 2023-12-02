@@ -1,3 +1,5 @@
+import asyncio
+
 from models import Persona
 from services.json_service import GetRandomPerson
 
@@ -7,7 +9,7 @@ class Game:
     CurrentPerson: Persona
 
     def __init__(self):
-        self.CurrentPerson = await GetRandomPerson()
+        self.CurrentPerson = asyncio.run(GetRandomPerson())
         self.score = 100
 
     def GuessName(self, name):

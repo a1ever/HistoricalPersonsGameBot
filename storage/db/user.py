@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, VARCHAR, DATE, Boolean
+from sqlalchemy import Column, Integer, VARCHAR, Boolean
 from .base import BaseModel
+
 
 class User(BaseModel):
     __tablename__ = 'Users'
@@ -20,4 +21,3 @@ class User(BaseModel):
 
     def __str__(self) -> str:
         return f"<User:{self.uuid}>"
-

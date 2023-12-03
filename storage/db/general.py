@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, VARCHAR, DATE, Boolean
+from sqlalchemy import Column, Integer, VARCHAR, DATE
+from sqlalchemy.orm import relationship
+
 from .base import BaseModel
 
 
@@ -13,6 +15,8 @@ class General(BaseModel):
     link_to_photo = Column(VARCHAR, nullable=False)
     activity = Column(VARCHAR, nullable=False)
 
+    quotes = relationship("Quotes", back_populates="General")
+    facts = relationship("Facts", back_populates="General")
+
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"
-

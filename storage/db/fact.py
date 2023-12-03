@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, TEXT, DATE, Boolean, VARCHAR
 from .base import BaseModel
 
 
-class GameState(BaseModel):
+class Fact(BaseModel):
     __tablename__ = 'Facts'
 
     level_id = Column(Integer, unique=True, nullable=False, primary_key=True)

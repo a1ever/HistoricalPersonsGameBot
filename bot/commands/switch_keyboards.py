@@ -37,7 +37,6 @@ async def callback_game(callback: types.CallbackQuery,
 
 async def callback_help(callback: types.CallbackQuery,
         callback_data: HelpFactory) -> None:
-    # TODO info in db
     with suppress(TelegramBadRequest):
         match callback_data.where:
             case "game":

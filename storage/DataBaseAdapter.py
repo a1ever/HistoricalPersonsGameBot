@@ -1,7 +1,9 @@
 from sqlalchemy import select
+from sqlalchemy.orm import sessionmaker
 
 from storage.FactState import Fact
-from storage.db import General, Fact, Quote
+from storage.db import General, Fact, Quote, GameState
+
 
 # s = (select()
 #      .select_from(General
@@ -18,7 +20,11 @@ async def get_top_info(user_id: int) -> object:
     return f"Ты хорош, {user_id}, а статистика в бд)"
 
 
-async def get_surrender(user_id: int):
+async def get_surrender(user_id: int, session_maker: sessionmaker):
+    async with session_maker() as session:
+        async with session.begin():
+            await session.execute(select(GameState).where(user_id == GameState.uuid).delete())
+
     return f"Слабый"
 
 

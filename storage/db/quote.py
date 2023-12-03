@@ -15,5 +15,6 @@ class Quote(BaseModel):
     quote_5 = Column(VARCHAR, unique=True, nullable=False)
 
     general = relationship("General", back_populates="Quotes")
+
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"

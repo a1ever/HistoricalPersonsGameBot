@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, VARCHAR, DATE, Boolean
+from sqlalchemy import Column, VARCHAR
 from .base import BaseModel
 
 
-class General(BaseModel):
+class EasterEgg(BaseModel):
     __tablename__ = 'Easter_eggs'
 
     frase = Column(VARCHAR, unique=True, nullable=False, primary_key=True)

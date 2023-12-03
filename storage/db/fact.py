@@ -1,12 +1,13 @@
-from sqlalchemy import Column, Integer, TEXT, DATE, Boolean, VARCHAR
+from sqlalchemy import Column, Integer, VARCHAR, ForeignKey
+from sqlalchemy.orm import relationship
 
 from .base import BaseModel
 
 
-class GameState(BaseModel):
+class Fact(BaseModel):
     __tablename__ = 'Facts'
 
-    level_id = Column(Integer, unique=True, nullable=False, primary_key=True)
+    level_id = Column(Integer, ForeignKey("General.level_id"), unique=True, nullable=False, primary_key=True)
     base_fact = Column(VARCHAR, unique=True, nullable=False)
     fact_1 = Column(VARCHAR, unique=True, nullable=False)
     fact_2 = Column(VARCHAR, unique=True, nullable=False)
@@ -18,6 +19,8 @@ class GameState(BaseModel):
     fact_8 = Column(VARCHAR, unique=True, nullable=False)
     fact_9 = Column(VARCHAR, unique=True, nullable=False)
     fact_10 = Column(VARCHAR, unique=True, nullable=False)
+
+    general = relationship("General", back_populates="Facts")
 
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"

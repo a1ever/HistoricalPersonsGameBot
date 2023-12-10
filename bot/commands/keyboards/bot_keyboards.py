@@ -1,7 +1,12 @@
+from typing import Optional
+
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from sqlalchemy.orm import sessionmaker
 
 from bot.commands.keyboards.callback_factories import *
-from storage.FactState import Fact
+from storage.DataBaseAdapter import get_current_game_state, get_campaign_status
+from storage.Models.game_state_model import GameStateModel
+from storage.db import Fact, GameState
 
 
 def get_start_keyboard():
@@ -23,10 +28,10 @@ def get_start_keyboard():
 def get_game_keyboard():
     builder = InlineKeyboardBuilder()
     builder.button(
-        text="Кампания", callback_data=GameFactory(is_campaign=True)
+        text="Кампания", callback_data=GameFactory(is_campaign=True, is_done=False, is_from_game=False)
     )
     builder.button(
-        text="Один персонаж", callback_data=GameFactory(is_campaign=False)
+        text="Один персонаж", callback_data=GameFactory(is_campaign=False, is_done=False, is_from_game=False)
     )
     builder.button(
         text="Назад", callback_data="start"
@@ -68,31 +73,69 @@ def get_help_keyboard():
     return builder.as_markup()
 
 
-def get_fact_keyboard():
+def get_fact_keyboard(is_done: bool, is_from_game: bool):
     builder = InlineKeyboardBuilder()
+    if not is_done:
+        builder.button(
+            text="Получить факт в текущей игре", callback_data=FactFactory(where="fact", info="")
+        )
+    if is_from_game:
+        builder.button(
+            text="Изменить режим игры", callback_data=FactFactory(where="change", info="")
+        )
     builder.button(
-        text="Получить факт", callback_data=FactFactory(where="fact")
-    )
-    builder.button(
-        text="Сдаюсь", callback_data=FactFactory(where="surrender")
+        text="Сдаюсь в текущей игре", callback_data=FactFactory(where="surrender", info="")
     )
 
     builder.adjust(1)
     return builder.as_markup()
 
 
-def generate_round_keyboard(fact: Fact):
+async def generate_round_keyboard(user_id: int, session_maker: sessionmaker,
+                                  game_state: Optional[GameStateModel] = None):
+    if game_state is None:
+        game_state = await get_current_game_state(user_id, session_maker)
     builder = InlineKeyboardBuilder()
-    if fact.fact_amount != fact.max_fact_amount:
+    if game_state.fact_amount < 10:
         builder.button(
-            text="Получить", callback_data=FactFactory(where="fact")
+            text="Получить факт", callback_data=FactFactory(where="game", info="fact")
+        )
+
+    if game_state.quote_amount < 5:
+        builder.button(
+            text="Получить цитату", callback_data=FactFactory(where="game", info="quote")
+            #     game_state=game_state
+            #                                                               .withNewQuoteAmount(game_state.fact_amount + 1)
+            #                                                               .addMinus(1)
+        )
+    if game_state.age_fact_amount < 2:
+        builder.button(
+            text="Получить факт о возрасте", callback_data=FactFactory(where="game", info="age")
+            #    game_state=game_state
+            #                                                                        .withNewAgeFactAmount(game_state.fact_amount + 1)
+            #                                                                        .addMinus(3)
+        )
+    if not game_state.displayed_country:
+        builder.button(
+            text="Откуда родом?", callback_data=FactFactory(where="game", info="country")
+            #     game_state=game_state
+            #                                                             .withDisplayedCountry()
+            #                                                             .addMinus(5)
+        )
+    if not game_state.displayed_photo:
+        builder.button(
+            text="Фото", callback_data=FactFactory(where="game", info="photo")
+            # game_state=game_state   .withDisplayedCountry()                     .addMinus(10)
+        )
+    if not game_state.displayed_activity:
+        builder.button(
+            text="Вид деятельности", callback_data=FactFactory(where="game", info="activity")
+            #     game_state
+            #                                                                .withDisplayedCountry()
+            #                                                                .addMinus(10)
         )
     builder.button(
-        text="по", callback_data=FactFactory(where="fact")
-    )
-    builder.button(
-        text="ебалу", callback_data=FactFactory(where="surrender")
-    )
-
-    builder.adjust(1)
+        text="Назад", callback_data=GameFactory(is_campaign=await get_campaign_status(user_id, session_maker),
+                                                is_done=game_state.is_done(), is_from_game=True))
+    builder.adjust(2)
     return builder.as_markup()

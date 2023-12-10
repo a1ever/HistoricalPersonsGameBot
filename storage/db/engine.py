@@ -5,12 +5,12 @@ from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker
 
 
-def create_engine(url: Union[URL, str]) -> AsyncEngine:
-    return create_async_engine(url=url, echo=True, encoding='utf-8', pool_pre_ping=True)
+def create_pool(url: Union[URL, str]) -> AsyncEngine:
+    return create_async_engine(url=url)
 
 
 async def proceed_schemas(engine: AsyncEngine, metadata) -> None:
-    async with engine.connect() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(metadata.create_all)
 
 

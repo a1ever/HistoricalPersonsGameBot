@@ -1,13 +1,11 @@
-import os
-
 import asyncio
 import logging
+import os
+
 from aiogram import Bot, Dispatcher
-from sqlalchemy import URL
 
 from bot.commands import register_user_commands
-
-from storage.db import create_engine, get_session_maker, proceed_schemas, BaseModel
+from storage.db import create_pool, get_session_maker, proceed_schemas, BaseModel
 
 
 async def main():
@@ -18,20 +16,11 @@ async def main():
 
     register_user_commands(dp)
 
-    postgres_url = URL.create(
-        "postgresql+asyncpg",
-        username=os.getenv("db_user"),
-        # password="", TODO
-        host="localhost",
-        port=os.getenv("db_port"),
-        database=os.getenv("db_name")
-    )
-
-    async_engine = create_engine(postgres_url)
+    async_engine = create_pool(f"sqlite+aiosqlite:///{os.getenv('db_path')}")
     session_maker = get_session_maker(async_engine)
     await proceed_schemas(async_engine, BaseModel.metadata)
 
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, session_maker=session_maker)
 
 if __name__ == "__main__":
     try:

@@ -1,4 +1,3 @@
-from typing import Optional
 from aiogram.filters.callback_data import CallbackData
 
 
@@ -8,6 +7,8 @@ class BackFactory(CallbackData, prefix="back"):
 
 class GameFactory(CallbackData, prefix="game"):
     is_campaign: bool
+    is_done: bool
+    is_from_game: bool
 
 
 class MenuFactory(CallbackData, prefix="menu"):
@@ -24,6 +25,7 @@ class HelpFactory(CallbackData, prefix="help"):
 
 class FactFactory(CallbackData, prefix="fact"):
     where: str
+    info: str
 
 
 

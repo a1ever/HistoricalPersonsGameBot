@@ -6,4 +6,4 @@ from bot.commands import bot_commands_description, CommandsCallouts
 async def command_help(message: types.Message, command: CommandObject):
     if command.args:
         return await message.answer("На данный момент бот не может выдать справку по конкретной команде")
-    return await message.answer(bot_commands_description[CommandsCallouts.help])
+    return await message.answer(''.join(f"/{com} - {what}\n" for (com, what) in bot_commands_description.items()))

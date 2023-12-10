@@ -30,7 +30,6 @@ async def get_top_info(user_id: int, session_maker: sessionmaker) -> str:
 async def create_new_user(user_id: int, name: str, session_maker: sessionmaker):
     async with session_maker() as session:
         async with session.begin():
-            print(11213)
             res = (await session.scalar(select(func.count()).select_from(User).where(User.uuid == user_id)))
             if res == 0:
                 await session.execute(insert(User).values(uuid=user_id, username=name))
@@ -93,8 +92,6 @@ async def create_null_game_state(user_id: int, session_maker: sessionmaker):
                 await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id)))
             ans = await session.scalar(
                 select(GameState).where(user_id == GameState.uuid).where(is_in_campaign == GameState.type_of_game))
-            print(1122)
-            print(ans)
             if ans is None:
                 if is_in_campaign:
                     user = (await session.scalar(select(User).where(user_id == User.uuid)))

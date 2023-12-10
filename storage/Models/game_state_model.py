@@ -11,7 +11,7 @@ class GameStateModel:
     minus_points: int
 
     def __str__(self) -> str:
-        return f"<User:{self.uuid} "  ", self.minus_points}>"
+        return f""
 
     def addFactAmount(self):
         self.fact_amount += 1

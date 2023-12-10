@@ -23,4 +23,3 @@ def register_user_commands(router: Router) -> None:
     router.callback_query.register(callback_help, HelpFactory.filter())
     router.callback_query.register(callback_fact, FactFactory.filter())
     router.callback_query.register(callback_start, F.data == "start")
-    # router.callback_query.register()

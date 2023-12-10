@@ -7,7 +7,6 @@ from storage.DataBaseAdapter import get_name, output_game_state, get_current_gam
 
 
 async def message_guess(message: types.Message, session_maker: sessionmaker):
-    print(message.text)
     guess = message.text
     words = guess.split()
     if len(words) > 2:

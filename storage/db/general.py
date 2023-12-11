@@ -22,5 +22,5 @@ class General(BaseModel):
         if amount >= 2:
             ans += "Родился: " + self.date_of_birth + "\n"
         if amount >= 1:
-            ans += "Умер: "  + self.date_of_death + "\n"
+            ans += "Умер: " + self.date_of_death + "\n"
         return ans

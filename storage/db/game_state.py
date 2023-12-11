@@ -47,7 +47,6 @@ class GameState(BaseModel):
         self.displayed_photo = True
         return self
 
-
     def withDisplayedActivity(self):
         self.displayed_activity = True
         return self

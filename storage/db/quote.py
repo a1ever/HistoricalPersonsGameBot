@@ -18,6 +18,5 @@ class Quote(BaseModel):
 
     def get_quotes(self, amount: int, quote_order: str) -> str:
         quotes = [self.quote_1, self.quote_2, self.quote_3, self.quote_4, self.quote_5]
-        order = list(map(int, quote_order.split()))
-        arr = list(map(lambda q: quotes[order[q]], range(len(quotes))))
-        return "\n".join(f"Цитата {i+1}: \"{qt}\"\n" for i, qt in enumerate(arr[0:amount])) + "\n"
+        arr = [quotes[int(i)] for i in quote_order.split()]
+        return "\n".join(f'Цитата {i+1}: "{qt}"\n' for i, qt in enumerate(arr[0:amount])) + "\n"

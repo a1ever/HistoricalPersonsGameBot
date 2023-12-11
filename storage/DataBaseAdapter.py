@@ -215,7 +215,7 @@ async def output_game_state(user_id: int, session_maker: sessionmaker, previous_
             facts: Fact
             quotes = (await session.scalar(select(Quote).where(Quote.level_id == game_state.level_id)))
             quotes: Quote
-            ans += facts.get_facts(game_state.fact_amount, game_state.fact_order)
+            ans += facts.get_facts(game_state.fact_amount + 1, game_state.fact_order)
             ans += quotes.get_quotes(game_state.quote_amount, game_state.quote_order)
             ans += general.get_age_fact(game_state.age_fact_amount)
             if game_state.displayed_activity:

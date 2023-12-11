@@ -91,7 +91,7 @@ async def callback_fact(callback: types.CallbackQuery,
                 game_state = await get_current_game_state(callback.from_user.id, session_maker)
                 match callback_data.info:
                     case "fact":
-                        game_state.addFactAmount().addMinus(2)
+                        game_state.addFactAmount().addMinus(1)
                         await update_current_game_state(game_state, session_maker)
                         ans = await output_game_state(callback.from_user.id, session_maker)
                         await callback.message.edit_text(text=ans[0],

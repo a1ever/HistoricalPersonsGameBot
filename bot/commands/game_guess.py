@@ -20,11 +20,11 @@ async def message_guess(message: types.Message, session_maker: sessionmaker):
         await update_score(message.from_user.id, points, session_maker)
         await update_user_campaign_status(message.from_user.id, session_maker)
         await delete_game_state(message.from_user.id, game.type_of_game, session_maker)
-        await message.answer(text=f"Победа!\n Очков за уровень: {points}",
+        await message.answer(text=f"Победа!\nОчков за уровень: {points}",
                              reply_markup=await get_game_keyboard(message.from_user.id, session_maker))
     elif answer == "":
         return
     else:
         ans = await output_game_state(message.from_user.id, session_maker)
-        await message.answer(text="Не верный ответ!\n"+ans[0],
+        await message.answer(text="Неверный ответ!\n"+ans[0],
                              reply_markup=await generate_round_keyboard(message.from_user.id, session_maker))

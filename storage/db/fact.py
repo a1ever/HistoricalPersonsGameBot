@@ -24,6 +24,5 @@ class Fact(BaseModel):
 
     def get_facts(self, amount: int, fact_order: str) -> str:
         facts = [self.base_fact, self.fact_1, self.fact_2, self.fact_3, self.fact_4, self.fact_5, self.fact_6, self.fact_7, self.fact_8, self.fact_9, self.fact_10]
-        order = list(map(int, fact_order.split()))
-        arr = list(map(lambda q: facts[order[q]], range(len(facts))))
+        arr = [facts[int(i)] for i in fact_order.split()]
         return "\n".join(f"Факт {i + 1}: {qt}\n" for i, qt in enumerate(arr[0:amount])) + "\n"

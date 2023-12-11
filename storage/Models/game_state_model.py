@@ -9,6 +9,8 @@ class GameStateModel:
     displayed_activity: int
     quote_amount: int
     minus_points: int
+    fact_order: str
+    quote_order: str
 
     def __str__(self) -> str:
         return f""

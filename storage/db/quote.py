@@ -16,16 +16,8 @@ class Quote(BaseModel):
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"
 
-    def get_quotes(self, amount: int) -> str:
-        ans = ""
-        if amount == 5:
-            ans += self.quote_5 + "\n" + "\n"
-        if amount >= 4:
-            ans += self.quote_4 + "\n" + "\n"
-        if amount >= 3:
-            ans += self.quote_3 + "\n" + "\n"
-        if amount >= 2:
-            ans += self.quote_2 + "\n" + "\n"
-        if amount >= 1:
-            ans = "Цитаты:\n" + ans + self.quote_1 + "\n" + "\n"
-        return ans
+    def get_quotes(self, amount: int, quote_order: str) -> str:
+        quotes = [self.quote_1, self.quote_2, self.quote_3, self.quote_4, self.quote_5]
+        order = list(map(int, quote_order.split()))
+        arr = list(map(lambda q: quotes[order[q]], range(len(quotes))))
+        return "\n".join(f"Цитата {i+1}: {qt}\n" for i, qt in enumerate(arr[0:amount])) + "\n"

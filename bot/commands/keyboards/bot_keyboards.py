@@ -4,7 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.orm import sessionmaker
 
 from bot.commands.keyboards.callback_factories import *
-from storage.DataBaseAdapter import get_current_game_state, get_campaign_status
+from storage.DataBaseAdapter import get_current_game_state, get_user_in_campaign, \
+    campaign_status_can
 from storage.Models.game_state_model import GameStateModel
 from storage.db import Fact, GameState
 
@@ -25,11 +26,12 @@ def get_start_keyboard():
     return builder.as_markup()
 
 
-def get_game_keyboard():
+async def get_game_keyboard(user_id: int, session_maker: sessionmaker):
     builder = InlineKeyboardBuilder()
-    builder.button(
-        text="Кампания", callback_data=GameFactory(is_campaign=True, is_done=False, is_from_game=False)
-    )
+    if await campaign_status_can(user_id, session_maker):
+        builder.button(
+            text="Кампания", callback_data=GameFactory(is_campaign=True, is_done=False, is_from_game=False)
+        )
     builder.button(
         text="Один персонаж", callback_data=GameFactory(is_campaign=False, is_done=False, is_from_game=False)
     )
@@ -73,19 +75,20 @@ def get_help_keyboard():
     return builder.as_markup()
 
 
-def get_fact_keyboard(is_done: bool, is_from_game: bool):
+def get_fact_keyboard(is_done: bool, is_from_game: bool, can_change: bool):
     builder = InlineKeyboardBuilder()
     if not is_done:
         builder.button(
             text="Получить факт в текущей игре", callback_data=FactFactory(where="fact", info="")
         )
     if is_from_game:
+        if can_change:
+            builder.button(
+                text="Изменить режим игры", callback_data=FactFactory(where="change", info="")
+            )
         builder.button(
-            text="Изменить режим игры", callback_data=FactFactory(where="change", info="")
+            text="Сдаюсь в текущей игре", callback_data=FactFactory(where="surrender", info="")
         )
-    builder.button(
-        text="Сдаюсь в текущей игре", callback_data=FactFactory(where="surrender", info="")
-    )
 
     builder.adjust(1)
     return builder.as_markup()
@@ -135,7 +138,7 @@ async def generate_round_keyboard(user_id: int, session_maker: sessionmaker,
             #                                                                .addMinus(10)
         )
     builder.button(
-        text="Назад", callback_data=GameFactory(is_campaign=await get_campaign_status(user_id, session_maker),
+        text="Назад", callback_data=GameFactory(is_campaign=await get_user_in_campaign(user_id, session_maker),
                                                 is_done=game_state.is_done(), is_from_game=True))
     builder.adjust(2)
     return builder.as_markup()

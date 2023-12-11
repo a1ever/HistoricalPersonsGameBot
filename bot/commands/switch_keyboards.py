@@ -11,7 +11,7 @@ from bot.commands.keyboards.bot_keyboards import get_game_keyboard, get_statisti
 from bot.commands.keyboards.callback_factories import GameFactory, MenuFactory, HelpFactory, StatisticsFactory, \
     FactFactory
 from storage.DataBaseAdapter import get_personal_info, get_top_info, get_current_game_state, get_surrender, \
-    update_user_in_campaign, create_null_game_state, output_game_state, update_current_game_state, get_campaign_status
+    update_user_in_campaign, create_null_game_state, output_game_state, update_current_game_state, get_user_in_campaign, campaign_status_can
 
 
 async def callback_menu(callback: types.CallbackQuery,
@@ -19,7 +19,8 @@ async def callback_menu(callback: types.CallbackQuery,
     with suppress(TelegramBadRequest):
         match callback_data.where:
             case "play":
-                await callback.message.edit_text(callback.message.text, reply_markup=get_game_keyboard())
+                await callback.message.edit_text(callback.message.text,
+                                                 reply_markup=await get_game_keyboard(callback.from_user.id, session_maker))
             case "statistics":
                 await callback.message.edit_text(callback.message.text, reply_markup=get_statistics_keyboard())
             case "help":
@@ -31,12 +32,13 @@ async def callback_game(callback: types.CallbackQuery,
     with suppress(TelegramBadRequest):
         await update_user_in_campaign(callback.from_user.id, callback_data.is_campaign, session_maker)
         await create_null_game_state(callback.from_user.id, session_maker)
-        if not callback_data.is_from_game:
-            await callback.message.edit_text(callback.message.text,
-                                             reply_markup=get_fact_keyboard(callback_data.is_done, callback_data.is_from_game))
-        else:
-            await callback.message.edit_text(callback.message.text,
-                                             reply_markup=get_fact_keyboard(callback_data.is_done, callback_data.is_from_game))
+
+        await callback.message.edit_text(callback.message.text,
+                                             reply_markup=get_fact_keyboard(callback_data.is_done,
+                                                                            callback_data.is_from_game,
+                                                                            await campaign_status_can(callback.from_user.id,
+                                                                                                      session_maker)
+                                                                            ))
 
 
 async def callback_help(callback: types.CallbackQuery,
@@ -70,14 +72,15 @@ async def callback_fact(callback: types.CallbackQuery,
         match callback_data.where:
             case "fact":
                 ans = await output_game_state(callback.from_user.id, session_maker)
-                await callback.message.edit_text(text=ans[0], reply_markup=await generate_round_keyboard(callback.from_user.id, session_maker))
+                await callback.message.edit_text(text=ans[0],
+                                                 reply_markup=await generate_round_keyboard(callback.from_user.id, session_maker))
 
             case "surrender":
                 await callback.message.edit_text(text=await get_surrender(callback.from_user.id,  session_maker),
-                                                 reply_markup=get_game_keyboard())
+                                                 reply_markup=await get_game_keyboard(callback.from_user.id, session_maker))
             case "change":
                 await update_user_in_campaign(callback.from_user.id,
-                                              not await get_campaign_status(callback.from_user.id, session_maker),
+                                              not await get_user_in_campaign(callback.from_user.id, session_maker),
                                               session_maker)
                 await create_null_game_state(callback.from_user.id, session_maker)
                 ans = await output_game_state(callback.from_user.id, session_maker)

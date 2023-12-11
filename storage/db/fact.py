@@ -22,26 +22,8 @@ class Fact(BaseModel):
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"
 
-    def get_facts(self, amount: int) -> str:
-        ans = "Факты: \n" + self.base_fact + "\n"
-        if amount >= 10:
-            ans += self.fact_10 + "\n" + "\n"
-        if amount >= 9:
-            ans += self.fact_9 + "\n" + "\n"
-        if amount >= 8:
-            ans += self.fact_8 + "\n" + "\n"
-        if amount >= 7:
-            ans += self.fact_7 + "\n" + "\n"
-        if amount >= 6:
-            ans += self.fact_6 + "\n" + "\n"
-        if amount >= 5:
-            ans += self.fact_5 + "\n" + "\n"
-        if amount >= 4:
-            ans += self.fact_4 + "\n" + "\n"
-        if amount >= 3:
-            ans += self.fact_3 + "\n" + "\n"
-        if amount >= 2:
-            ans += self.fact_2 + "\n" + "\n"
-        if amount >= 1:
-            ans += self.fact_1 + "\n" + "\n" + "\n"
-        return ans
+    def get_facts(self, amount: int, fact_order: str) -> str:
+        facts = [self.base_fact, self.fact_1, self.fact_2, self.fact_3, self.fact_4, self.fact_5, self.fact_6, self.fact_7, self.fact_8, self.fact_9, self.fact_10]
+        order = list(map(int, fact_order.split()))
+        arr = list(map(lambda q: facts[order[q]], range(len(facts))))
+        return "\n".join(f"Факт {i + 1}: {qt}\n" for i, qt in enumerate(arr[0:amount])) + "\n"

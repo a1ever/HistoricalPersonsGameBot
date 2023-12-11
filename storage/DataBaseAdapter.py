@@ -1,5 +1,7 @@
 import random
+from typing import Any
 
+import numpy
 from sqlalchemy import select, insert, func, update, delete
 from sqlalchemy.orm import sessionmaker
 
@@ -20,7 +22,12 @@ async def get_personal_info(user_id: int, session_maker: sessionmaker) -> str:
             random_points = await session.scalar(select(User.random_problems_score).where(User.uuid == user_id))
             campaign_points = await session.scalar(select(User.campaign_score).where(User.uuid == user_id))
             campaign_lv = await session.scalar(select(User.campaign_status).where(User.uuid == user_id))
-            return f"Ваш текущий уровень в кампании: {campaign_lv}\nЗа предыдущие уровни вы получили - {campaign_points}\nЗа случайные уровни вы набрали - {random_points}"
+            ans = ""
+            if await campaign_status_can(user_id, session_maker):
+                ans = f"Ваш текущий уровень в кампании: {campaign_lv}\n"
+            else:
+                ans = "Вы прошли кампанию!\n"
+            return f"{ans}За уровни кампании вы получили - {campaign_points}\nЗа случайные уровни вы набрали - {random_points}"
 
 
 async def get_top_info(user_id: int, session_maker: sessionmaker) -> str:
@@ -33,6 +40,19 @@ async def create_new_user(user_id: int, name: str, session_maker: sessionmaker):
             res = (await session.scalar(select(func.count()).select_from(User).where(User.uuid == user_id)))
             if res == 0:
                 await session.execute(insert(User).values(uuid=user_id, username=name))
+
+
+async def update_score(user_id: int, score: int, session_maker: sessionmaker):
+    async with session_maker() as session:
+        async with session.begin():
+            if await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id)):
+                await session.execute(update(User).where(User.uuid == user_id)
+                                      .values(campaign_score=score + await session.scalar(
+                    select(User.campaign_score).where(User.uuid == user_id))))
+            else:
+                await session.execute(update(User).where(User.uuid == user_id)
+                                      .values(random_problems_score=score + await session.scalar(
+                    select(User.random_problems_score).where(User.uuid == user_id))))
 
 
 async def update_user_in_campaign(user_id: int, status: bool, session_maker: sessionmaker):
@@ -51,20 +71,7 @@ async def update_user_campaign_status(user_id: int, session_maker: sessionmaker)
                     campaign_status=current_level + 1))
             else:
                 await session.execute(update(User).where(User.uuid == user_id).values(
-                    campaign_status=1))
-
-
-async def update_score(user_id: int, score: int, session_maker: sessionmaker):
-    async with session_maker() as session:
-        async with session.begin():
-            if await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id)):
-                await session.execute(update(User).where(User.uuid == user_id)
-                                      .values(campaign_score=score + await session.scalar(
-                    select(User.campaign_score).where(User.uuid == user_id))))
-            else:
-                await session.execute(update(User).where(User.uuid == user_id)
-                                      .values(random_problems_score=score + await session.scalar(
-                    select(User.random_problems_score).where(User.uuid == user_id))))
+                    campaign_status=(await session.scalar(select(func.count()).select_from(General))) + 1))
 
 
 async def update_current_game_state(game: GameStateModel, session_maker: sessionmaker):
@@ -82,33 +89,15 @@ async def update_current_game_state(game: GameStateModel, session_maker: session
                 displayed_activity=game.displayed_activity,
                 quote_amount=game.quote_amount,
                 minus_points=game.minus_points,
+                fact_order=game.fact_order,
+                quote_order=game.quote_order,
             ))
-
-
-async def create_null_game_state(user_id: int, session_maker: sessionmaker):
-    async with session_maker() as session:
-        async with session.begin():
-            is_in_campaign = (
-                await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id)))
-            ans = await session.scalar(
-                select(GameState).where(user_id == GameState.uuid).where(is_in_campaign == GameState.type_of_game))
-            if ans is None:
-                if is_in_campaign:
-                    user = (await session.scalar(select(User).where(user_id == User.uuid)))
-                    user: User
-                    await session.execute(
-                        insert(GameState).values(uuid=user_id, type_of_game=True, level_id=user.campaign_status))
-                else:
-                    level_amount = (await session.scalar(select(func.count()).select_from(General)))
-                    await session.execute(
-                        insert(GameState).values(uuid=user_id, type_of_game=False,
-                                                 level_id=random.randint(1, level_amount + 1)))
 
 
 async def get_surrender(user_id: int, session_maker: sessionmaker):
     async with session_maker() as session:
         async with session.begin():
-            type_of_game = await get_campaign_status(user_id, session_maker)
+            type_of_game = await get_user_in_campaign(user_id, session_maker)
             level = (await session.scalar(
                 select(GameState.level_id).where(user_id == GameState.uuid).where(
                     GameState.type_of_game == type_of_game)))
@@ -121,6 +110,29 @@ async def get_surrender(user_id: int, session_maker: sessionmaker):
     return f"Очков за данный уровень 0. Персонажем был {ans}"
 
 
+async def create_null_game_state(user_id: int, session_maker: sessionmaker):
+    async with session_maker() as session:
+        async with session.begin():
+            is_in_campaign = (
+                await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id)))
+            ans = await session.scalar(
+                select(GameState).where(user_id == GameState.uuid).where(is_in_campaign == GameState.type_of_game))
+            if ans is None:
+                facts = ' '.join(f"{i}" for i in numpy.random.permutation(range(0, 11)))
+                quotes = ' '.join(f"{i}" for i in numpy.random.permutation(range(0, 5)))
+                if is_in_campaign:
+                    user = (await session.scalar(select(User).where(user_id == User.uuid)))
+                    user: User
+                    await session.execute(
+                        insert(GameState).values(uuid=user_id, type_of_game=True, level_id=user.campaign_status,
+                                                 fact_order=facts, quote_order=quotes))
+                else:
+                    level_amount = (await session.scalar(select(func.count()).select_from(General)))
+                    await session.execute(
+                        insert(GameState).values(uuid=user_id, type_of_game=False,
+                                                 level_id=random.randint(1, level_amount), fact_order=facts, quote_order=quotes))
+
+
 async def delete_game_state(user_id: int, type_of_game: bool, session_maker: sessionmaker):
     async with session_maker() as session:
         async with session.begin():
@@ -131,7 +143,7 @@ async def delete_game_state(user_id: int, type_of_game: bool, session_maker: ses
 async def get_name(user_id: int, session_maker: sessionmaker) -> str:
     async with session_maker() as session:
         async with session.begin():
-            type_of_game = await get_campaign_status(user_id, session_maker)
+            type_of_game = await get_user_in_campaign(user_id, session_maker)
             level = (await session.scalar(
                 select(GameState.level_id).where(user_id == GameState.uuid).where(
                     GameState.type_of_game == type_of_game)))
@@ -143,7 +155,7 @@ async def get_name(user_id: int, session_maker: sessionmaker) -> str:
 async def get_current_game_state(user_id: int, session_maker: sessionmaker) -> GameStateModel:
     async with session_maker() as session:
         async with session.begin():
-            type_of_game = await get_campaign_status(user_id, session_maker)
+            type_of_game = await get_user_in_campaign(user_id, session_maker)
             game_state = (await session.scalar(
                 select(GameState).where(user_id == GameState.uuid).where(GameState.type_of_game == type_of_game)))
             model = GameStateModel()
@@ -157,22 +169,43 @@ async def get_current_game_state(user_id: int, session_maker: sessionmaker) -> G
             model.displayed_activity = game_state.displayed_activity
             model.quote_amount = game_state.quote_amount
             model.minus_points = game_state.minus_points
+            model.fact_order = game_state.fact_order
+            model.quote_order = game_state.quote_order
 
             return model
 
 
-async def get_campaign_status(user_id: int, session_maker: sessionmaker) -> bool:
+async def get_user_in_campaign(user_id: int, session_maker: sessionmaker) -> bool:
     async with session_maker() as session:
         async with session.begin():
-            return await session.scalar(select(User.is_in_campaign).where(User.uuid == user_id))
+            ans = await session.scalar(select(User).where(User.uuid == user_id))
+            ans: User
+            if not await campaign_status_can(user_id, session_maker):
+                await update_user_in_campaign(user_id, False, session_maker)
+                return False
+            return ans.is_in_campaign
+
+async def campaign_status_can(user_id: int, session_maker: sessionmaker) -> bool:
+    async with session_maker() as session:
+        async with session.begin():
+            return await session.scalar(select(User.campaign_status).where(User.uuid == user_id)) < ((await session.scalar(select(func.count()).select_from(General))) + 1)
 
 
 async def output_game_state(user_id: int, session_maker: sessionmaker, previous_msg="") -> [str, str]:
     async with session_maker() as session:
         async with session.begin():
-            type_of_game = await get_campaign_status(user_id, session_maker)
+            type_of_game = await get_user_in_campaign(user_id, session_maker)
             game_state = (await session.scalar(
                 select(GameState).where(user_id == GameState.uuid).where(GameState.type_of_game == type_of_game)))
+            if game_state is None:
+                if not type_of_game:
+                    await create_null_game_state(user_id, session_maker)
+                    game_state = (await session.scalar(
+                        select(GameState).where(user_id == GameState.uuid).where(
+                            GameState.type_of_game == type_of_game)))
+                else:
+                    return ["Unknown Error",
+                            "https://cdn.fishki.net/upload/post/2021/08/30/3909511/1f21cb369a625b5f1ff2040161ed2d6d.jpg"]
             ans = ("Случайный\n", "Кампания\n")[type_of_game]
             if type_of_game:
                 ans += f"Уровень {game_state.level_id} "
@@ -182,13 +215,13 @@ async def output_game_state(user_id: int, session_maker: sessionmaker, previous_
             facts: Fact
             quotes = (await session.scalar(select(Quote).where(Quote.level_id == game_state.level_id)))
             quotes: Quote
-            ans += facts.get_facts(game_state.fact_amount)
-            ans += quotes.get_quotes(game_state.quote_amount)
+            ans += facts.get_facts(game_state.fact_amount, game_state.fact_order)
+            ans += quotes.get_quotes(game_state.quote_amount, game_state.quote_order)
             ans += general.get_age_fact(game_state.age_fact_amount)
             if game_state.displayed_activity:
-                ans += "Активность:" + general.activity + "\n"
+                ans += "Активность: " + general.activity + "\n"
             if game_state.displayed_country:
-                ans += "Страна:" + general.country + "\n"
+                ans += "Страна: " + general.country + "\n"
             if not game_state.displayed_photo:
                 link = "https://cdn.fishki.net/upload/post/2021/08/30/3909511/1f21cb369a625b5f1ff2040161ed2d6d.jpg"
             else:

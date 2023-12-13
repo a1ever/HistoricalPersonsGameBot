@@ -2,7 +2,6 @@ import asyncio
 import logging
 import os
 
-import numpy
 from aiogram import Bot, Dispatcher
 
 from bot.commands import register_user_commands

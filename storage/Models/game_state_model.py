@@ -29,6 +29,8 @@ class GameStateModel:
 
     def addMinus(self, val: int):
         self.minus_points += val
+        if self.minus_points < 0:
+            self.minus_points = 0
         return self
 
     def withDisplayedCountry(self):

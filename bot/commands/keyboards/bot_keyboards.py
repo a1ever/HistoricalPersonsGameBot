@@ -113,7 +113,7 @@ async def generate_round_keyboard(user_id: int, session_maker: sessionmaker,
         )
     if game_state.age_fact_amount < 2:
         builder.button(
-            text="Получить факт о возрасте", callback_data=FactFactory(where="game", info="age")
+            text="Факт о возрасте", callback_data=FactFactory(where="game", info="age")
             #    game_state=game_state
             #                                                                        .withNewAgeFactAmount(game_state.fact_amount + 1)
             #                                                                        .addMinus(3)

@@ -15,7 +15,9 @@ async def main():
 
     register_user_commands(dp)
 
-    async_engine = create_pool(os.getenv('db_path'))
+    url = f"mysql+aio{os.getenv('db_path')}"
+
+    async_engine = create_pool(url)
     session_maker = get_session_maker(async_engine)
     await proceed_schemas(async_engine, BaseModel.metadata)
 

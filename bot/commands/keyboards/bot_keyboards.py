@@ -120,7 +120,7 @@ async def generate_round_keyboard(user_id: int, session_maker: sessionmaker,
         )
     if not game_state.displayed_country:
         builder.button(
-            text="Откуда родом?", callback_data=FactFactory(where="game", info="country")
+            text="Страна", callback_data=FactFactory(where="game", info="country")
             #     game_state=game_state
             #                                                             .withDisplayedCountry()
             #                                                             .addMinus(5)

@@ -209,7 +209,7 @@ async def output_game_state(user_id: int, session_maker: sessionmaker, previous_
             ans = ("Случайный\n", "Кампания\n")[type_of_game]
             if type_of_game:
                 ans += f"Уровень {game_state.level_id} "
-            ans += f"Очков: {120 - game_state.minus_points}\n"
+            ans += f"Очков: {125 - game_state.minus_points}\n"
             general = (await session.scalar(select(General).where(General.level_id == game_state.level_id)))
             facts = (await session.scalar(select(Fact).where(Fact.level_id == game_state.level_id)))
             facts: Fact
@@ -219,7 +219,7 @@ async def output_game_state(user_id: int, session_maker: sessionmaker, previous_
             ans += quotes.get_quotes(game_state.quote_amount, game_state.quote_order)
             ans += general.get_age_fact(game_state.age_fact_amount)
             if game_state.displayed_activity:
-                ans += "Активность: " + general.activity + "\n"
+                ans += "Профессия: " + general.activity + "\n"
             if game_state.displayed_country:
                 ans += "Страна: " + general.country + "\n"
             if not game_state.displayed_photo:

@@ -122,9 +122,10 @@ async def callback_fact(callback: types.CallbackQuery,
                         await callback.message.edit_text(text=ans[0],
                                                          reply_markup=await generate_round_keyboard(callback.from_user.id, session_maker, game_state))
                     case "photo":
-                        game_state.withDisplayedPhoto().addMinus(50)
-                        await update_current_game_state(game_state, session_maker)
-                        ans = await output_game_state(callback.from_user.id, session_maker)
-                        await callback.message.answer_photo(URLInputFile(ans[1]))
-                        await callback.message.edit_text(text=ans[0],
-                                                         reply_markup=await generate_round_keyboard(callback.from_user.id, session_maker, game_state))
+                        if not game_state.displayed_photo:
+                            game_state.withDisplayedPhoto().addMinus(50)
+                            await update_current_game_state(game_state, session_maker)
+                            ans = await output_game_state(callback.from_user.id, session_maker)
+                            await callback.message.answer_photo(URLInputFile(ans[1]))
+                            await callback.message.edit_text(text=ans[0],
+                                                             reply_markup=await generate_round_keyboard(callback.from_user.id, session_maker, game_state))

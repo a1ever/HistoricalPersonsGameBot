@@ -11,6 +11,7 @@ from storage.db import create_pool, get_session_maker, proceed_schemas, BaseMode
 async def main():
     logging.basicConfig(level=logging.INFO)
 
+    print("asonas[dasd")
     dp = Dispatcher()
     bot = Bot(token=os.getenv('bot_token'))
 

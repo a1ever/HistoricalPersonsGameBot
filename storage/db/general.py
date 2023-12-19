@@ -7,12 +7,12 @@ class General(BaseModel):
     __tablename__ = 'General'
 
     level_id = Column(Integer, unique=True, nullable=False, primary_key=True)
-    full_name = Column(VARCHAR, nullable=False)
-    country = Column(VARCHAR, nullable=False)
-    date_of_birth = Column(VARCHAR, nullable=False)
-    date_of_death = Column(VARCHAR, nullable=False)
-    link_to_photo = Column(VARCHAR, nullable=False)
-    activity = Column(VARCHAR, nullable=False)
+    full_name = Column(VARCHAR(200), nullable=False)
+    country = Column(VARCHAR(200), nullable=False)
+    date_of_birth = Column(VARCHAR(200), nullable=False)
+    date_of_death = Column(VARCHAR(200), nullable=False)
+    link_to_photo = Column(VARCHAR(200), nullable=False)
+    activity = Column(VARCHAR(200), nullable=False)
 
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"

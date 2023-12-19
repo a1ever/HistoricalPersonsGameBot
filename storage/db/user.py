@@ -9,7 +9,7 @@ class User(BaseModel):
     uuid = Column(Integer, unique=True, nullable=False, primary_key=True)
 
     # Telegram user name
-    username = Column(VARCHAR(32), unique=False, nullable=True)
+    username = Column(VARCHAR(50), unique=False, nullable=True)
     campaign_status = Column(Integer, unique=False, nullable=True, default=1)
     is_in_campaign = Column(Boolean, unique=False, nullable=False, default=False)
     campaign_score = Column(Integer, unique=False, default=0)

@@ -7,11 +7,11 @@ class Quote(BaseModel):
     __tablename__ = 'Quotes'
 
     level_id = Column(Integer, unique=True, nullable=False, primary_key=True)
-    quote_1 = Column(VARCHAR, nullable=False)
-    quote_2 = Column(VARCHAR, nullable=False)
-    quote_3 = Column(VARCHAR, nullable=False)
-    quote_4 = Column(VARCHAR, nullable=False)
-    quote_5 = Column(VARCHAR, nullable=False)
+    quote_1 = Column(VARCHAR(200), nullable=False)
+    quote_2 = Column(VARCHAR(200), nullable=False)
+    quote_3 = Column(VARCHAR(200), nullable=False)
+    quote_4 = Column(VARCHAR(200), nullable=False)
+    quote_5 = Column(VARCHAR(200), nullable=False)
 
     def __str__(self) -> str:
         return f"<User:{self.level_id}>"

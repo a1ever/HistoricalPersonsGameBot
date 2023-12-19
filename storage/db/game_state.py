@@ -16,8 +16,8 @@ class GameState(BaseModel):
     displayed_activity = Column(Boolean, default=False)
     quote_amount = Column(Integer, default=0)
     minus_points = Column(Integer, default=0)
-    fact_order = Column(VARCHAR, default="0 1 2 3 4 5 6 7 8 9 10")
-    quote_order = Column(VARCHAR, default="0 1 2 3 4")
+    fact_order = Column(VARCHAR(30), default="0 1 2 3 4 5 6 7 8 9 10")
+    quote_order = Column(VARCHAR(30), default="0 1 2 3 4")
     UniqueConstraint("uuid", "type_of_game", name="uix_1")
 
     def __str__(self) -> str:

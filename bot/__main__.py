@@ -16,7 +16,9 @@ async def main():
 
     register_user_commands(dp)
 
-    async_engine = create_pool(f"sqlite+aiosqlite:///{os.getenv('db_path')}")
+    url = "mysql+aiomysql://root:2Ghgb6fhBDBA5DaA2hhh-gBe233B-dA-@viaduct.proxy.rlwy.net:15123/railway"
+
+    async_engine = create_pool(url)
     session_maker = get_session_maker(async_engine)
     await proceed_schemas(async_engine, BaseModel.metadata)
 

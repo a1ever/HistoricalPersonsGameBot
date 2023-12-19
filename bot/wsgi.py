@@ -24,8 +24,7 @@ async def main():
 
     await dp.start_polling(bot, session_maker=session_maker)
 
-if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        print('Bot stopped')
+
+def application(environ, start_response):
+    start_response('200 ОК', [('Content-type', 'text/plain')])
+    asyncio.run(main())

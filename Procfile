@@ -1,1 +1,1 @@
-web: gunicorn bot.app:application --log-file -
+web: gunicorn -k uvicorn.workers.UvicornWorker bot:app --log-file -

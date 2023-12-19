@@ -26,6 +26,6 @@ async def main():
     await dp.start_polling(bot, session_maker=session_maker)
 
 
-def application(environ, start_response):
-    start_response('200 ОК', [('Content-type', 'text/plain')])
-    asyncio.run(main())
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())

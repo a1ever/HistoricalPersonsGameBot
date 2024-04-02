@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:sqlite:D:\sqlite\bot_db.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="railway@monorail.proxy.rlwy.net" uuid="1cd99fd3-846a-4f11-98c9-3eda75700fb1">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://monorail.proxy.rlwy.net:56262/railway</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
